@@ -1,5 +1,5 @@
 use gtk4::prelude::*;
-use gtk4::{Application, ApplicationWindow, Button, Entry, Grid, glib};
+use gtk4::{Application, ApplicationWindow, Button, Entry, Grid, Label, glib};
 const APP_ID: &str = "org.gtk_rs.HelloWorld3";
 
 fn main() -> glib::ExitCode {
@@ -16,7 +16,7 @@ fn main() -> glib::ExitCode {
 fn build_ui(app: &Application) {
     // Create a button with label and margins
     let button = Button::builder()
-        .label("Press me!")
+        .label("Submit Guess!")
         .margin_top(12)
         .margin_bottom(12)
         .margin_start(12)
@@ -29,9 +29,11 @@ fn build_ui(app: &Application) {
         button.set_label("Hello World!");
     });
 
-    let entry = Entry::new();
-    entry.set_placeholder_text(Some("Something"));
+    let label = Label::new(Some("Wordle-RS"));
 
+    label.set_halign(gtk4::Align::Start);
+    label.set_margin_bottom(10);
+    label.set_markup("<span size='xx-large' weight='bold'>Wordle-RS</span>"); // bold & big text
     let grid = Grid::builder()
         .column_spacing(10)
         .row_spacing(10)
@@ -41,8 +43,14 @@ fn build_ui(app: &Application) {
         .margin_end(20)
         .build();
 
-    grid.attach(&button, 0, 0, 1, 1);
-    grid.attach(&entry, 1, 0, 1, 1);
+    grid.attach(&label, 0, 0, 10, 1);
+    for i in 1..6 {
+        for j in 1..6 {
+            let entry = Entry::new();
+            grid.attach(&entry, j, i + 1, 1, 1);
+        }
+    }
+    grid.attach(&button, 3, 7, 1, 1);
 
     // Create a window
     let window = ApplicationWindow::builder()
