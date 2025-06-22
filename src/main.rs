@@ -15,20 +15,6 @@ fn main() -> glib::ExitCode {
 
 fn build_ui(app: &Application) {
     // Create a button with label and margins
-    let button = Button::builder()
-        .label("Submit Guess!")
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .build();
-
-    // Connect to "clicked" signal of `button`
-    button.connect_clicked(|button| {
-        // Set the label to "Hello World!" after the button has been clicked on
-        button.set_label("Hello World!");
-    });
-
     let label = Label::new(Some("Wordle-RS"));
 
     label.set_halign(gtk4::Align::Start);
@@ -43,13 +29,37 @@ fn build_ui(app: &Application) {
         .margin_end(20)
         .build();
 
+    let mut entry_vec = Vec::new();
+
     grid.attach(&label, 0, 0, 10, 1);
     for i in 1..6 {
         for j in 1..6 {
             let entry = Entry::new();
+            entry.set_max_length(1);
             grid.attach(&entry, j, i + 1, 1, 1);
+            entry_vec.push(entry);
         }
     }
+    let button = Button::builder()
+        .label("Submit Guess!")
+        .margin_top(12)
+        .margin_bottom(12)
+        .margin_start(12)
+        .margin_end(12)
+        .build();
+
+    let entries_clone = entry_vec.clone();
+    // Connect to "clicked" signal of `button`
+    button.connect_clicked(move |_| {
+        for (i, entry) in entries_clone.iter().enumerate() {
+            let text = entry.text();
+            if !text.is_empty() {
+                entry.set_editable(false);
+            }
+            println!("Entry {}: {}", i, text);
+        }
+    });
+
     grid.attach(&button, 3, 7, 1, 1);
 
     // Create a window
