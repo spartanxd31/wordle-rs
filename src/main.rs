@@ -2,6 +2,16 @@ use gtk4::prelude::*;
 use gtk4::{Application, ApplicationWindow, Button, Entry, Grid, Label, glib};
 const APP_ID: &str = "org.gtk_rs.HelloWorld3";
 
+pub struct Wordle {
+    answer: String,
+}
+
+impl Wordle {
+    pub fn check_string(&self, guess: String) -> bool {
+        self.answer == guess
+    }
+}
+
 fn main() -> glib::ExitCode {
     // Create a new application
     let app = Application::builder().application_id(APP_ID).build();
@@ -49,15 +59,24 @@ fn build_ui(app: &Application) {
         .build();
 
     let entries_clone = entry_vec.clone();
+    let game = Wordle {
+        answer: "hello".to_owned(),
+    };
     // Connect to "clicked" signal of `button`
     button.connect_clicked(move |_| {
+        let mut screen_string = String::new();
+
         for (i, entry) in entries_clone.iter().enumerate() {
             let text = entry.text();
             if !text.is_empty() {
+                screen_string.push_str(text.as_str());
                 entry.set_editable(false);
             }
             println!("Entry {}: {}", i, text);
         }
+        println!("{:}", screen_string);
+        let check = game.check_string(screen_string);
+        println!("{:}", check);
     });
 
     grid.attach(&button, 3, 7, 1, 1);
