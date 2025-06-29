@@ -2,13 +2,40 @@ use gtk4::prelude::*;
 use gtk4::{Application, ApplicationWindow, Button, Entry, Grid, Label, glib};
 const APP_ID: &str = "org.gtk_rs.HelloWorld3";
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 pub struct Wordle {
     answer: String,
+    round: u8,
 }
 
 impl Wordle {
-    pub fn check_string(&self, guess: String) -> bool {
-        self.answer == guess
+    //TO DO Change this function to also if not correct, what spaces are correct"
+    pub fn check_string(&self, guess: &String) -> bool {
+        self.answer == guess.clone()
+    }
+    pub fn correct_slots(&self, guess: &String) -> Vec<u8> {
+        let answer_char = self.answer.as_str().chars();
+        let guess_clone = guess.clone();
+        let guess_char = guess_clone.as_str().chars();
+        let mut count = 0;
+        let mut correct: Vec<u8> = Vec::new();
+        for (c_answer, c_guess) in answer_char.zip(guess_char) {
+            if c_answer == c_guess {
+                correct.push(count);
+            }
+            count += 1;
+        }
+        correct
+    }
+
+    fn update_round(&mut self) {
+        self.round += 1;
+    }
+
+    pub fn get_round(&self) -> u8 {
+        self.round
     }
 }
 
@@ -59,9 +86,13 @@ fn build_ui(app: &Application) {
         .build();
 
     let entries_clone = entry_vec.clone();
-    let game = Wordle {
+    //TO-DO load this with a random value from a 5 letter word list
+    let game = Rc::new(RefCell::new(Wordle {
         answer: "hello".to_owned(),
-    };
+        round: 0,
+    }));
+
+    let game_clone = Rc::clone(&game);
     // Connect to "clicked" signal of `button`
     button.connect_clicked(move |_| {
         let mut screen_string = String::new();
@@ -74,9 +105,15 @@ fn build_ui(app: &Application) {
             }
             println!("Entry {}: {}", i, text);
         }
-        println!("{:}", screen_string);
-        let check = game.check_string(screen_string);
-        println!("{:}", check);
+        let mut game = game_clone.borrow_mut();
+        let check = game.check_string(&screen_string);
+        let correct = game.correct_slots(&screen_string);
+        for val in correct {
+            println!("{val}")
+        }
+        game.update_round();
+        let round = game.get_round();
+        println!("{round}");
     });
 
     grid.attach(&button, 3, 7, 1, 1);
